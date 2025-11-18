@@ -9,11 +9,14 @@
 #define DHT11_PIN 26
 
 // const definition
-#define SSID "arnaud"
-#define WIFI_PWD "182$Y0t6"
-#define SRV "192.168.0.25"
+#define SSID ""
+#define WIFI_PWD ""
+#define SRV ""
 #define SRV_PORT 1883
-#define TOKEN "K1NfsvtIiDlt85U9jd6x"
+
+#define humidity_topic "sensor/DHT11/humidity"
+#define temperature_topic "sensor/DHT11/temperature"
+
 
 // SRV connection
 WiFiClient wifiClient;
@@ -51,8 +54,8 @@ void wifi_reconnect() {
 //setup + connection to thingsboard
 void srv_reconnect() {
   while (!client.connected()) {
-    Serial.print("Connecting to ThingsBoard...");
-    if (client.connect("ESP32Client", TOKEN, NULL)) {
+    Serial.print("Connecting to MQTT Broker...");
+    if (client.connect("ESP32Client")) {
       Serial.println("Connected!");
     } else {
       Serial.print("Failed, rc=");
@@ -108,12 +111,8 @@ void loop() {
     Serial.print(" %, Temperature = ");
     Serial.print(tempC);
     Serial.println(" °C");
-    String payload = "{\"temperature\":";
-    payload += tempC;
-    payload += ",\"humidity\":";
-    payload += humi;
-    payload += "}";
-    client.publish("v1/devices/me/telemetry", payload.c_str());
+    client.publish(humidity_topic, String(humi).c_str(), true);
+    client.publish(temperature_topic, String(tempC).c_str(), true);
   }
 
   delay(100); //delay
